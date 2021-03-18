@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %} 
+
+    {% for key, survey in surveys.items() %}
+    <div class="container survey">
+        <h1>{{ survey.title }}</h1>
+
+        <form action="/" method="POST">
+            <input type="radio" name="survey" value="{{ key }}" checked hidden>
+            <button class="btn btn-primary mt-3">Take Survey</button>
+        </form>
+    </div>
+    {% endfor %}
+
+{% endblock %}
