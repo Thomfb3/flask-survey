@@ -1,7 +1,6 @@
-from flask import Flask, request, render_template, redirect, flash, session
+from flask import Flask, request, render_template, redirect, flash, make_response, session
 from flask_debugtoolbar import DebugToolbarExtension
 from surveys import surveys
-
 
 
 
@@ -17,19 +16,47 @@ RESPONSES_KEY = "responses"
 @app.route('/')
 def show_survey_intro():
     """show survery start button"""
-    return render_template('survey.html', surveys=surveys)
+    #taken surveys
+    taken_surveys = []
+    #retrive active survey cookie
+    active_survey = request.cookies.get("survey")
+
+    for key, item in surveys.items():
+        if key in request.cookies:
+            taken_surveys.append(key)
+
+
+    # if there is an active survey cookie set, force user to continue that survey
+    if active_survey:
+        #get survey form session
+        survey = surveys[active_survey]
+        #Provide msg about survey in progress
+        flash(f"{survey.title} is already in progress. Please complete before attempting other surveys.", "error")
+        #Render continue instead of survey selection page
+        return render_template("continue_survey.html", survey=survey)
+
+    #render survey selection page
+    return render_template('survey.html', surveys=surveys, taken_surveys=taken_surveys)
 
 
 @app.route('/', methods=["POST"])
 def pick_survey():
     """initialize survey session"""
+    #retrive survey name from form
     survey_name = request.form['survey']
 
+    #get survey object from surveys list
     survey = surveys[survey_name]
+    #save in sessions
     session[CURRENT_SURVEY_KEY] = survey_name
     session[RESPONSES_KEY] = []
 
-    return render_template("start_survey.html", survey=survey)
+    #Set cookie for survey
+    page = render_template("start_survey.html", survey=survey)
+    res = make_response(page)
+    res.set_cookie("survey", survey_name)
+
+    return res
   
 
 @app.route('/start', methods=["POST"])
@@ -39,12 +66,23 @@ def start_survey():
     return redirect("/question/0")
 
 
+@app.route('/continue', methods=["POST"])
+def continue_survey():
+    """initialize survey session"""
+    #set responses from session[RESPONSES_KEY]
+    responses = session[RESPONSES_KEY]
+    survey_name = session[CURRENT_SURVEY_KEY]
+   
+    return redirect(f"/question/{len(responses)}")
+
+
 @app.route('/answer', methods=["POST"])
 def answer():
     """handle the answer"""
     #collect the answer from the post
     answer = request.form['answer']
     text = request.form.get('text', "")
+    
     #set responses from session[RESPONSES_KEY]
     responses = session[RESPONSES_KEY]
     survey_name = session[CURRENT_SURVEY_KEY]
@@ -99,6 +137,10 @@ def complete():
     survey_name = session[CURRENT_SURVEY_KEY]
     survey = surveys[survey_name]
 
+    #Delete cookie for active survey on completed page
+    page = render_template("survey_completed.html", survey=survey, responses=responses)
+    res = make_response(page)
+    res.set_cookie(survey_name, "True")
+    res.delete_cookie("survey")
 
-    return render_template("survey_completed.html", survey=survey, responses=responses)
-    
+    return res

@@ -35,6 +35,26 @@ footer {
 
 .survey {
     background-color: #e9ecef;
-    padding: 20px;
+    padding: 25px;
     margin-top: 30px;
+}
+
+.survey h1 {
+    display: inline-block;
+}
+
+.survey-completed {
+    font-size: 12px;
+    display: inline-block;
+    color: rgb(15, 109, 81);
+    background-color: rgb(88, 228, 186);
+    padding: 5px 15px;
+    border-radius: 20px;
+    position: relative;
+    bottom: 10px;
+    margin-left: 25px;
+}
+.survey-completed p {
+    display: inline-block;
+    margin: 0px
 }

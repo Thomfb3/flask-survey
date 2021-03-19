@@ -5,6 +5,12 @@
     {% for key, survey in surveys.items() %}
     <div class="container survey">
         <h1>{{ survey.title }}</h1>
+        {% if key in taken_surveys %}
+        <div class="survey-completed">
+            <i class="fas fa-check"></i>
+            <p>Survey Completed</p>
+        </div>
+        {% endif  %}
 
         <form action="/" method="POST">
             <input type="radio" name="survey" value="{{ key }}" checked hidden>

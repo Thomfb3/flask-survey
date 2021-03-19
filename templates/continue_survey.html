@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %} 
+
+    <div class="container survey">
+        <h1>{{ survey.title }}</h1>
+        <h4>Instructions:</h4>
+        <p>{{ survey.instructions }}</p>
+
+        <form action="/continue" method="POST">
+            <button class="btn btn-primary mt-3">Continue Survey</button>
+        </form>
+    </div>
+
+
+{% endblock %}
